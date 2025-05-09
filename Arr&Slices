@@ -105,4 +105,128 @@ Output:
 пришлось искать новый участок памяти.
 
 Например, если мы создадим массив с вместимостью в 10 элементов, наполним его
-5 элементами, а потом добавим один - адрес массива не изменится
+5 элементами, а потом добавим один - адрес массива не изменится:
+
+package main 
+
+import "fmt"
+
+func main() {
+  var foo = make ([]int, 5, 10)
+  fmt.Printf("Address of foo array [before append] : %p\n", &foo)
+
+  foo = append (foo, 222)
+  fmt.Printf("Address of foo array [after append] :%p\n", %foo)
+}
+
+/*
+Output:
+	Address of foo array [before append]: 0xc0000aa018
+	Address of foo array [after append]: 0xc0000aa018
+*/  
+
+
+К слову, если мы явно не задали вместимость слайса (то есть использовали конструкцию
+make([]int, 5)), то вместимость будет равна длине массива (в данном случае - 5)
+
+Если же мы укажем вместимость массива меньше, чем его длину, то код и вовске неском-
+пилируется:
+
+package main 
+
+import "fmt"
+
+func main() {
+
+  var foo = make ([]int, 5, 4)
+  fmt.Printf("Capacity of the array : ", cap (foo))
+}
+
+
+/*
+	./prog.go:6:24: invalid argument: length and capacity swapped
+*/
+
+
+Что будет если мы переполним вместимость ?
+Если же мы переполним вместимость слайсв, то 
+вместимость умножится на 2:
+
+package main 
+
+import "fmt"
+
+func main () {
+  var foo = make([]int, 10, 10)
+  foo = append(foo, 2) //добавляем элемент
+  fmt.Println("Lenght of the array:", len(foo))
+  fmt.Println("Capacity of the array:", cap(foo))
+
+}
+
+/*
+Output:
+	Length of the array: 11
+	Capacity of the array: 20
+*/
+
+
+При этом в памяти произойдет следующее:
+
+1) Go что нам не хватает памяти и посмотрит есть ли после текущего сегмента памяти
+еще столько же ячеек
+
+2) Если ячейки есть, но он не будет передвигать массив и просто зарезервирует больше
+памяти
+
+3) Если ячеек нет то он скопирует всю инфу из уже использующегося сегмента и найдет 
+вдвое больше свободных ячеек, после нахождения он перенесет туда все данные и отдаст 
+нам адрес сегмента.
+
+
+Shorthand-syntax 
+С короткой версией обьявления слайса все проще
+
+package main 
+
+import "fmt"
+
+func main(){
+  foo := []int{1,2,3}
+  fmt.Println("Lenght of the array:", len(foo)
+  fmt.Println("Capacity of the array:", cap(foo))
+}
+
+
+/*
+Output:
+	Length of the array: 3
+	Capacity of the array: 3
+*/
+
+
+В этом примере Go создаст массив (под капотом) с длиной в три ячейки и такой же
+вместимостью 
+
+
+
+Срезы на слайсах
+
+Срезом на слайсе является дочерний слайс, который ссылется только на часть слайса:
+
+package main 
+
+import "fmt"
+
+func main() {
+  name := []string {"D", "a", "n", "i", "i", "l"}
+  firstThreeLetters := name[:3]
+  fmt.Println(firstThreeLetters)
+  
+
+}
+
+/*
+Output:
+	[D a n]
+*/
