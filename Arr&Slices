@@ -279,7 +279,101 @@ package main
 
 import "fmt"
 
+func main () {
+	nameArray := [6]string{"D", "a", "n", "i", "i", "l"}
+	nameSlice := nameArray[:3]
+	nameSlice[len(nameSlice)-1] = "m"
+	fmt.Println(nameSlice) //[D a m]
+	fmt.Println(nameArray) // [D a m i i l]
+}
 
 
+Мы также можем сделать так, чтобы срез занял всю длину исходного массива. Так как 
+слайс хранит вместимость исходного массива - мы можем сделать срез снова и указать 
+параметр cap(nameArray):
+
+package main 
+
+import "fmt"
+
+func main() {
+		nameArray := [6]string{"D", "a", "n", "i", "i", "l"}
+		nameSlice := nameArray[:3]
+		nameSlice[len(nameSlice)-1] = "m"
+		fmt.Println(nameSlice) // [D a m]
+
+		//делаем новый срез 
+		nameSlice = nameSlice[0:cap(nameSlice)]
+		fmt.Println(nameSlice)// [D a m i i l]
+}
 
 
+У нас может возникнуть вопром: почему мы не срезали cap(nameSlice) - 1, ибо мы
+указали в конце несуществующий индекс (на один больше, нежели существует в массиве)
+Все дело в том, что последниц элемент при срезе не вкл в срез.
+
+То есть, первый индекс идет включительно в срез, а последний - не вкл.
+
+
+Копирование 
+Как уже можно понять, при срезе с массива или слайса мы не создаем новый слайс. Также,
+если мы присвоим одной переменной значение слайса другой переменной - они обе будут
+указывать на один массив:
+
+package main 
+
+import ( 
+	"fmt"
+)
+
+func main() {
+	nameSlice := []string{"D", "a", "n", "i", "i", "l"}
+	secondNameSlice := nameSlice
+	secondNameSlice[0] = "T"
+	fmt.Println(nameSlice, secondNameSlice) 
+//[T a n i i l] [T a n i i l]
+}
+
+Мы можем избежать такого поведения с помощью копирования. Для этого чтобы скопировать 
+слайс (создать независимую копию) - нам достаточно использовать функцию copу :
+
+package main 
+
+import (
+	"fmt"
+)
+
+func main() 
+	nameSlice := []string{"D", "a", "n", "i", "i", "l"}
+	secondNameSlice := make([]string, len(nameSlice, cap(nameSlice))
+	copy(secondNameSlice, nameSlice)
+	secondNameSlice[0] = "T"
+
+	fmt.Println(nameSlice, secondNameSlice) // [ D a n i i l] [T a n i i l]
+
+}
+
+
+copy and append под капотом 
+Мы можем заметить два различия : при использовании функции append - мы переприсваивали 
+значение переменной :
+
+foo := [] int{}
+foo := append(foo, 1)
+
+
+В случае с copy мы просто передаем саму переменную (не ссылку, а именно переменную)
+
+foo := []int {1, 2}
+bar := []int{}
+copy(bar, foo)
+
+
+Вот как работает копирование под капотом
+
+func copy (to []T, from []T) {
+	for i := range from {
+	to[i] = from [i] 
+	}
+
+}
