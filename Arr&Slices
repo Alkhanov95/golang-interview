@@ -377,3 +377,23 @@ func copy (to []T, from []T) {
 	}
 
 }
+
+Разработчики Go решили не добавлять часть с инициализацией нового слайса внутрь copy.
+
+В случае с дополнением все немного иначе. Тут разработчики Go посчитали, что функция
+сама должна решать нужно ли инициализировать новый слайс, или можно дополнить данные
+в уже существующий слайс:
+
+func append(slice []T, data ...T) []T {
+	initialLength := len(slice)
+	finalLength := m + len(data_
+	if finalLength > cap(slice) {// if necessary, reallocate
+        // allocate double what's needed, for future growth.
+	newSlice := make([]byte, (n+1)*2)
+	copy(newSclice, slice)
+	slice = newSlice
+	}
+	slice = slice[0:finalLength]
+	copy(slice[initialLengt:finalLength], data)
+	return slice
+}
